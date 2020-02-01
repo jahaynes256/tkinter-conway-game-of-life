@@ -9,18 +9,18 @@ cols = 50
 cellSize = 10
 
 def randMatrix():
-    return [[random.random() > 0.85 for j in range(cols)] for i in range(rows)]
+    return [[random.random() < 0.20 for j in range(cols)] for i in range(rows)]
 
 
 def getNeighbors(cellAlive,x,y): #Possibly Logically Incorrect
     count = 0
-    for j in range((y-1)%rows,(y+2)%rows):
-        for i in range((x-1)%cols,(x+2)%cols):
+    for j in range((y-1),(y+2)):
+        for i in range((x-1),(x+2)):
             if not ((i == x) and (j == y)):
-                #print(f'cords: ({i},{j})')
-                if cellAlive[i][j]:
+                if cellAlive[i%cols][j%rows]:
                     count += 1
     return count
+
 
 
 def checkForStateChange(cellAlive,checkTime=False):
@@ -30,7 +30,7 @@ def checkForStateChange(cellAlive,checkTime=False):
             for i in range(cols):
                 n = getNeighbors(cellAlive,i,j)
                 if cellAlive[i][j]:
-                    if not(2 <= n <= 3):
+                    if not((n==2) or (n==3)):
                         cellAlive[i][j] = False
                 else:
                     if n == 3:
@@ -63,6 +63,7 @@ class drawingTest(object):
         self.myCircle = [[(self.dispCanvas.create_rectangle(cellSize*i,cellSize*j,cellSize*(i+1),cellSize*(j+1), fill='#222222'))for j in range(cols)] for i in range(rows)]
         self.dispCanvas.pack()
         self.cellAlive = randMatrix()
+
         self.root.after(0, self.animation(checkTime=True))
 
         self.root.mainloop()
@@ -95,7 +96,27 @@ class drawingTest(object):
                 self.dispCanvas.update()
                 checkForStateChange(self.cellAlive)
 
-                
+
+    #----DEBUG METHODS---------
+    def highlightNeighbors(self,x,y):
+        print(f'Origin Point: ({x},{y})')
+        for j in range((y-1),(y+2)):
+            for i in range((x-1),(x+2)):
+                print(f'({i},{j})')
+                if not ((i == x) and (j == y)):
+                    self.dispCanvas.itemconfig(self.myCircle[i%cols][j%rows], fill='purple')
+                else:
+                    self.dispCanvas.itemconfig(self.myCircle[i%cols][j%rows], fill='blue')
+
+
+    def highlightCorners(self):
+        self.dispCanvas.itemconfig(self.myCircle[0][0], fill='red')
+        self.dispCanvas.itemconfig(self.myCircle[cols-1][0], fill='red')
+        self.dispCanvas.itemconfig(self.myCircle[0][rows-1], fill='red')
+        self.dispCanvas.itemconfig(self.myCircle[cols-1][rows-1], fill='red')
+    #------END DEBUG METHODS------
+
+
 def main():
     drawingTest()
 if __name__ == '__main__':
